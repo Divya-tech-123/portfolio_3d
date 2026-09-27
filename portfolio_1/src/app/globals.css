@@ -1,0 +1,541 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #030303;
+    --surface: #090909;
+    --accent-red: #c40024;
+    --bright-red: #e0002a;
+    --text: #f5f5f5;
+
+    --cyber-red: #c40024;
+    --cyber-red-dark: #8b0019;
+    --cyber-red-bright: #e0002a;
+    --cyber-cyan: #00f0ff;
+    --cyber-bg: #030303;
+
+    /* Cinematic Easing */
+    --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* CRITICAL: Never put overflow: hidden on html or body to keep Lenis smooth scrolling intact */
+  html {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    position: relative;
+    min-height: 100vh;
+    font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Lenis smooth scrolling integration classes */
+  html.lenis, html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  .lenis.lenis-smooth iframe {
+    pointer-events: none;
+  }
+
+  /* Custom Cyber Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #060606;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--bright-red), var(--accent-red));
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--bright-red);
+    box-shadow: 0 0 10px var(--bright-red);
+  }
+}
+
+/* =========================================================================
+   PERFORMANCE & TOUCH ACTION
+   ========================================================================= */
+.draggable-3d-element,
+[data-draggable-3d] {
+  touch-action: pan-y !important;
+}
+
+/* =========================================================================
+   CINEMATIC LAYERED ATMOSPHERE & VOLUMETRIC SMOKE
+   ========================================================================= */
+
+/* Layer 1 & 2: Atmospheric Red Glow (Breathing continuously) */
+.cine-atmospheric-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 850px at 65% 45%,
+    rgba(196, 0, 36, 0.28) 0%,
+    rgba(224, 0, 42, 0.12) 40%,
+    transparent 75%
+  );
+  mix-blend-mode: screen;
+  z-index: 2;
+  transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Reflective Dark Floor Gradient */
+.cine-floor-reflection {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 38vh;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(3, 3, 3, 0.98) 0%,
+    rgba(3, 3, 3, 0.65) 50%,
+    transparent 100%
+  );
+  z-index: 3;
+}
+
+/* Volumetric red smoke / fog overlay with continuous organic drift */
+.cine-smoke {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 65% 45% at 50% 60%,
+    rgba(196, 0, 36, 0.2) 0%,
+    rgba(139, 0, 25, 0.08) 50%,
+    transparent 100%
+  );
+  filter: blur(45px);
+  animation: smokeContinuousDrift 16s ease-in-out infinite alternate;
+  z-index: 4;
+}
+
+@keyframes smokeContinuousDrift {
+  0% { transform: scale(1) translate(0, 0); opacity: 0.65; }
+  50% { transform: scale(1.12) translate(3%, -2%); opacity: 0.88; }
+  100% { transform: scale(1.06) translate(-2%, 3%); opacity: 0.70; }
+}
+
+/* Dark radial edge vignette */
+.cine-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 85% 85% at 50% 50%,
+    rgba(3, 3, 3, 0.2) 0%,
+    rgba(3, 3, 3, 0.7) 60%,
+    rgba(3, 3, 3, 0.98) 100%
+  );
+  z-index: 5;
+}
+
+/* Dynamic cursor-tracking spotlight */
+.cine-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transition: opacity 0.4s ease;
+  z-index: 6;
+}
+
+/* Subtle SVG noise grain overlay with keyframe jitter */
+.cine-grain {
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  opacity: 0.04;
+  z-index: 7;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  animation: grainJitter 0.25s steps(3) infinite;
+}
+
+@keyframes grainJitter {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-3%, -2%); }
+  50% { transform: translate(2%, 3%); }
+  75% { transform: translate(-2%, 4%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Ultra-faint scanlines */
+.cine-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  z-index: 8;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.75) 2px,
+    rgba(0, 0, 0, 0.75) 4px
+  );
+}
+
+/* =========================================================================
+   EDITORIAL HERO & WATERMARK TYPOGRAPHY
+   ========================================================================= */
+.hero-watermark {
+  -webkit-text-stroke: 2px rgba(196, 0, 36, 0.35);
+  text-shadow: 0 0 50px rgba(196, 0, 36, 0.18);
+  user-select: none;
+  pointer-events: none;
+}
+
+.hero-text-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, #ff3b5c 50%, #c40024 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-neon-period {
+  color: #ff3b5c;
+  text-shadow: 0 0 15px #e0002a, 0 0 30px #c40024;
+}
+
+/* =========================================================================
+   EYEBROW SCANNING BEAM & WORD HIGHLIGHT GRADIENT
+   ========================================================================= */
+
+/* Eyebrow Laser Scanning Beam */
+@keyframes eyebrowScanBeam {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(200%);
+    opacity: 0;
+  }
+}
+
+.eyebrow-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.eyebrow-scan-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, #e0002a 30%, #ff3b5c 60%, #ffffff 80%, transparent 100%);
+  box-shadow: 0 0 8px #e0002a, 0 0 16px #ff3b5c;
+  animation: eyebrowScanBeam 1.3s cubic-bezier(0.22, 1, 0.36, 1) 0.2s 1 forwards;
+  pointer-events: none;
+}
+
+/* Word Highlight Gradient Animation (white -> soft pink -> deep crimson -> red) */
+@keyframes experiencesGradientSweep {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.experiences-highlight-gradient {
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #ffb3c1 25%,
+    #ff1744 50%,
+    #c40024 75%,
+    #8b0019 100%
+  );
+  background-size: 250% 100%;
+  background-position: 100% 50%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: experiencesGradientSweep 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.9s 1 forwards;
+}
+
+.hero-neon-period-glow {
+  color: #ff3b5c;
+  text-shadow: 0 0 15px #e0002a, 0 0 30px #c40024, 0 0 45px rgba(224, 0, 42, 0.6);
+}
+
+/* =========================================================================
+   NAVIGATION HOVER TEXT & ACTIVE STATE MICRO-INTERACTIONS
+   ========================================================================= */
+.nav-link-item {
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-link-item:hover .nav-link-text {
+  transform: translateY(-2px);
+  text-shadow: 0 0 12px rgba(224, 0, 42, 0.8), 0 0 20px rgba(196, 0, 36, 0.5);
+  color: #ffffff;
+}
+
+.nav-link-item .nav-link-underline {
+  position: absolute;
+  bottom: 0px;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: linear-gradient(90deg, #c40024, #ff3b5c);
+  box-shadow: 0 0 8px #e0002a;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-link-item:hover .nav-link-underline {
+  transform: scaleX(1);
+}
+
+.nav-link-item:hover .nav-link-icon {
+  transform: scale(1.15) translateX(1px);
+  color: #e0002a;
+}
+
+/* =========================================================================
+   PREMIUM BUTTON MICRO-INTERACTIONS
+   ========================================================================= */
+.cyber-btn-primary {
+  position: relative;
+  background: #e0002a;
+  color: #ffffff;
+  border: 1px solid rgba(255, 59, 92, 0.6);
+  box-shadow: 0 0 20px rgba(224, 0, 42, 0.45);
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cyber-btn-primary:hover {
+  background: #c40024;
+  transform: scale(1.03);
+  box-shadow: 0 0 30px rgba(224, 0, 42, 0.75), 0 0 50px rgba(196, 0, 36, 0.35);
+}
+
+.cyber-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.cyber-btn-secondary {
+  position: relative;
+  background: rgba(9, 9, 9, 0.85);
+  color: #ffffff;
+  border: 1px solid rgba(196, 0, 36, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cyber-btn-secondary:hover {
+  background: rgba(196, 0, 36, 0.15);
+  border-color: rgba(224, 0, 42, 0.8);
+  transform: scale(1.03);
+  box-shadow: 0 0 25px rgba(196, 0, 36, 0.4), inset 0 0 10px rgba(196, 0, 36, 0.2);
+}
+
+.cyber-btn-secondary:active {
+  transform: scale(0.98);
+}
+
+/* =========================================================================
+   TERMINAL BLINKING CURSOR
+   ========================================================================= */
+@keyframes terminalBlink {
+  0%, 49% {
+    opacity: 1;
+  }
+  50%, 100% {
+    opacity: 0;
+  }
+}
+
+.terminal-cursor-blink {
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  background-color: #ff3b5c;
+  box-shadow: 0 0 8px #e0002a;
+  vertical-align: middle;
+  margin-left: 4px;
+  animation: terminalBlink 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* =========================================================================
+   LASER SPINE & TIMELINE NODES
+   ========================================================================= */
+.timeline-laser-spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(
+    180deg,
+    rgba(196, 0, 36, 0.2) 0%,
+    rgba(224, 0, 42, 1) 15%,
+    rgba(255, 59, 92, 1) 50%,
+    rgba(224, 0, 42, 1) 85%,
+    rgba(196, 0, 36, 0.2) 100%
+  );
+  box-shadow: 0 0 12px rgba(224, 0, 42, 0.8), 0 0 24px rgba(196, 0, 36, 0.4);
+}
+
+.timeline-node-glow {
+  box-shadow: 0 0 15px rgba(224, 0, 42, 0.8), inset 0 0 8px rgba(224, 0, 42, 0.6);
+}
+
+.timeline-node-green {
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.8), inset 0 0 8px rgba(0, 255, 136, 0.6);
+}
+
+/* Pulse rings for waypoints */
+@keyframes ringPulse {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  50% { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(0.9); opacity: 0; }
+}
+
+.pulse-ring-red {
+  animation: ringPulse 2.2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+.pulse-ring-green {
+  animation: ringPulse 2.2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+/* =========================================================================
+   CYBER CARDS & GLASSMORPHISM
+   ========================================================================= */
+.cyber-card {
+  background: rgba(9, 9, 9, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(196, 0, 36, 0.22);
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cyber-card:hover {
+  border-color: rgba(224, 0, 42, 0.6);
+  box-shadow: 0 0 30px -5px rgba(196, 0, 36, 0.3), inset 0 0 15px rgba(196, 0, 36, 0.08);
+}
+
+.cyber-card-cyan {
+  background: rgba(9, 9, 9, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 240, 255, 0.22);
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cyber-card-cyan:hover {
+  border-color: rgba(0, 240, 255, 0.6);
+  box-shadow: 0 0 30px -5px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.08);
+}
+
+/* Neon Glow Texts */
+.neon-text-red {
+  color: #ff3b5c;
+  text-shadow: 0 0 10px rgba(224, 0, 42, 0.8), 0 0 20px rgba(196, 0, 36, 0.5);
+}
+
+.neon-text-cyan {
+  color: #00f0ff;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.7), 0 0 20px rgba(0, 240, 255, 0.4);
+}
+
+/* Cyber Corner Accents */
+.corner-tl, .corner-tr, .corner-bl, .corner-br {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  pointer-events: none;
+}
+.corner-tl { top: -1px; left: -1px; border-top: 2px solid #e0002a; border-left: 2px solid #e0002a; }
+.corner-tr { top: -1px; right: -1px; border-top: 2px solid #e0002a; border-right: 2px solid #e0002a; }
+.corner-bl { bottom: -1px; left: -1px; border-bottom: 2px solid #e0002a; border-left: 2px solid #e0002a; }
+.corner-br { bottom: -1px; right: -1px; border-bottom: 2px solid #e0002a; border-right: 2px solid #e0002a; }
+
+.corner-cyan-tl { top: -1px; left: -1px; border-top: 2px solid #00f0ff; border-left: 2px solid #00f0ff; }
+.corner-cyan-tr { top: -1px; right: -1px; border-top: 2px solid #00f0ff; border-right: 2px solid #00f0ff; }
+.corner-cyan-bl { bottom: -1px; left: -1px; border-bottom: 2px solid #00f0ff; border-left: 2px solid #00f0ff; }
+.corner-cyan-br { bottom: -1px; right: -1px; border-bottom: 2px solid #00f0ff; border-right: 2px solid #00f0ff; }
+
+/* 3D Transform Utility */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* =========================================================================
+   REDUCED MOTION ACCESSIBILITY
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+    filter: none !important;
+  }
+
+  .cine-smoke,
+  .cine-grain,
+  .eyebrow-scan-line,
+  .terminal-cursor-blink,
+  .pulse-ring-red,
+  .pulse-ring-green {
+    animation: none !important;
+  }
+
+  .experiences-highlight-gradient {
+    animation: none !important;
+    background-position: 0% 50% !important;
+  }
+}
